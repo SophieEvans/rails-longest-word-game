@@ -10,8 +10,12 @@ class GamesController < ApplicationController
     url = "https://wagon-dictionary.herokuapp.com/#{word}"
     user_serialized = open(url).read
     response = JSON.parse(user_serialized)
-    if response['found'] == true
-      "Well done, it's an English word"
+    return response['found']
+  end
+
+  def english_message(word)
+    if checks(word) == true
+      "It's an English word"
     else
       'Not an English word'
     end
@@ -26,16 +30,33 @@ class GamesController < ApplicationController
       count += 1 if grid_array.include? letter
     end
     if word.length < count || word.length <= 1
-      'Your word is invalid'
+      false
     else
-      'Your word is valid'
+      true
+    end
+  end
+
+  def grid_message(word, letters)
+    if check_grid(word, letters) == true
+      'The letters of your word are valid'
+    else
+      'The letters of your word are not valid'
+    end
+  end
+
+  def word_score(word, letters)
+    if check_grid(word, letters) == true && checks(word) == true
+      "Well done your score is #{word.length}!"
+    else
+      'Sorry, no score 😢'
     end
   end
 
   def score
     @word = params[:word]
     @letters = params[:letters]
-    @valid_message = check_grid(@word, @letters)
-    @english_message = checks(@word)
+    @valid_message = grid_message(@word, @letters)
+    @english_message = english_message(@word)
+    @your_score = word_score(@word, @letters)
   end
 end
